@@ -10,6 +10,8 @@ import { projectsRouter } from './modules/projects/projects.routes.js';
 import { tasksRouter } from './modules/tasks/tasks.routes.js';
 import { commentsRouter } from './modules/comments/comments.routes.js';
 import { attachmentsRouter } from './modules/attachments/attachments.routes.js';
+import { notificationsRouter } from './modules/notifications/notifications.routes.js';
+import { aiRouter } from './modules/ai/ai.routes.js';
 
 /**
  * Build the Express application with middleware and routers wired in order:
@@ -40,6 +42,8 @@ export function buildApp(): Express {
   app.use(tasksRouter);
   app.use(commentsRouter);
   app.use(attachmentsRouter);
+  app.use(notificationsRouter);
+  app.use(aiRouter);
 
   app.use(notFound);
   app.use(errorHandler);

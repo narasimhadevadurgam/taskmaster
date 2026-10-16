@@ -34,6 +34,7 @@
     "@types/pg": "8.11.6",
     "@types/supertest": "6.0.2",
     "cross-env": "7.0.3",
+    "socket.io-client": "4.7.5",
     "supertest": "7.0.0",
     "tsx": "4.16.2",
     "typescript": "5.5.3",
