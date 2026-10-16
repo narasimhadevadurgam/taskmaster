@@ -6,6 +6,10 @@ import { errorHandler } from './middleware/error.js';
 import { healthRouter } from './modules/health/health.routes.js';
 import { authRouter } from './modules/auth/auth.routes.js';
 import { usersRouter } from './modules/users/users.routes.js';
+import { projectsRouter } from './modules/projects/projects.routes.js';
+import { tasksRouter } from './modules/tasks/tasks.routes.js';
+import { commentsRouter } from './modules/comments/comments.routes.js';
+import { attachmentsRouter } from './modules/attachments/attachments.routes.js';
 
 /**
  * Build the Express application with middleware and routers wired in order:
@@ -32,6 +36,10 @@ export function buildApp(): Express {
 
   // Protected routers
   app.use(usersRouter);
+  app.use(projectsRouter);
+  app.use(tasksRouter);
+  app.use(commentsRouter);
+  app.use(attachmentsRouter);
 
   app.use(notFound);
   app.use(errorHandler);
