@@ -1,0 +1,46 @@
+# Canonical offline run path: `docker compose up` brings up Postgres and the API
+# (migrations applied on startup, mock LLM) with no external services required.
+services:
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: taskmgr
+      POSTGRES_PASSWORD: taskmgr
+      POSTGRES_DB: task_manager
+    ports:
+      - "5432:5432"
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      # pg_isready gates the api service's startup via depends_on below.
+      test: ["CMD-SHELL", "pg_isready -U taskmgr -d task_manager"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      # In-network connection string to the db service (not localhost).
+      DATABASE_URL: postgres://taskmgr:taskmgr@db:5432/task_manager
+      # Dev-only secret; override for any non-local deployment.
+      JWT_SECRET: dev-compose-secret-change-me-please
+      # Mock provider keeps the stack fully offline (no Ollama needed).
+      LLM_PROVIDER: mock
+      UPLOAD_DIR: /app/uploads
+      NODE_ENV: production
+      PORT: "3000"
+    ports:
+      - "3000:3000"
+    volumes:
+      - api-uploads:/app/uploads
+    # The image CMD already runs migrations before serving; nothing to override.
+
+volumes:
+  db-data:
+  api-uploads:

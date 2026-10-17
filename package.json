@@ -9,7 +9,7 @@
   },
   "scripts": {
     "build": "tsc",
-    "migrate": "node dist/db/migrate.js",
+    "migrate": "node dist/src/db/migrate.js",
     "migrate:dev": "tsx src/db/migrate.ts",
     "seed": "tsx scripts/seed.ts",
     "dev": "tsx src/index.ts",

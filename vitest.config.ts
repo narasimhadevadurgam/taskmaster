@@ -1,8 +1,13 @@
 import { defineConfig } from 'vitest/config';
 
-// Serial execution is the single authoritative spelling for the real-Postgres
-// integration suite (tests share one database). Unit tests in FEAT-001 do not
-// touch the DB, but the config is pinned here once for the whole project.
+// The real-Postgres integration suite shares ONE database, so execution must be
+// serial. This is the single authoritative spelling for Vitest v1 — configured
+// here once, never via conflicting CLI flags:
+//   - pool: 'forks' + poolOptions.forks.singleFork  -> one worker process
+//   - fileParallelism: false                         -> files run one at a time
+// globalSetup runs the migration runner once (not per file) against the test DB
+// (TEST_DATABASE_URL / DATABASE_URL); per-test isolation is resetDb() TRUNCATE
+// in each suite's beforeEach. Documented in the README (serial-test note).
 export default defineConfig({
   test: {
     pool: 'forks',
@@ -13,5 +18,6 @@ export default defineConfig({
     },
     fileParallelism: false,
     include: ['test/**/*.test.ts'],
+    globalSetup: ['test/helpers/globalSetup.ts'],
   },
 });
