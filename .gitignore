@@ -4,3 +4,4 @@ dist
 uploads/
 coverage
 *.log
+.agents/
