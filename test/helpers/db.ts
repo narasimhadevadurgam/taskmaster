@@ -25,8 +25,7 @@ export async function migrateTestDb(): Promise<void> {
 /**
  * Reset the database to an empty state. Truncates every domain table with
  * RESTART IDENTITY CASCADE so identity sequences and FKs reset cleanly. Call
- * from beforeEach so each test starts from a known-empty DB. FEAT-005 may
- * generalize this helper; the signature (resetDb) is stable for later FEATs.
+ * from beforeEach so each test starts from a known-empty DB.
  */
 export async function resetDb(): Promise<void> {
   await query(`TRUNCATE ${DOMAIN_TABLES.join(', ')} RESTART IDENTITY CASCADE`);

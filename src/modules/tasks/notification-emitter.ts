@@ -21,7 +21,7 @@ export interface NotificationInput {
 }
 
 /**
- * Seam that FEAT-004 replaces with the real socket.io-backed emitter.
+ * Seam the socket layer replaces with the real socket.io-backed emitter.
  *
  * The task service calls `persist` for each computed recipient INSIDE its write
  * transaction (passing the same transaction client so rows commit atomically
@@ -29,9 +29,9 @@ export interface NotificationInput {
  * persisted row, to push the row to the recipient's socket room.
  *
  * The default implementation (createNoopNotificationEmitter) persists the rows
- * (so GET /notifications works and the persistence contract holds without
- * FEAT-004) and makes `emit` a no-op (no socket layer yet). FEAT-004 provides an
- * emitter whose `emit` dispatches to socket.io while keeping the same `persist`.
+ * (so GET /notifications works and the persistence contract holds even with no
+ * socket layer attached) and makes `emit` a no-op. The socket-backed emitter
+ * dispatches to socket.io while keeping the same `persist`.
  */
 export interface NotificationEmitter {
   /**
@@ -52,8 +52,8 @@ export interface PersistedNotification extends NotificationInput {
 
 /**
  * Default emitter: persists rows inside the task transaction and performs no
- * socket emit. This keeps FEAT-003 building and testing green without FEAT-004.
- * FEAT-004 injects a replacement whose `emit` dispatches over socket.io.
+ * socket emit. This lets the task module work without a socket layer attached;
+ * the socket-backed emitter injected at startup dispatches over socket.io.
  */
 export function createNoopNotificationEmitter(): NotificationEmitter {
   return {
@@ -73,7 +73,7 @@ export function createNoopNotificationEmitter(): NotificationEmitter {
       };
     },
     emit() {
-      // no-op: no socket layer in FEAT-003.
+      // no-op: no socket layer attached.
     },
   };
 }

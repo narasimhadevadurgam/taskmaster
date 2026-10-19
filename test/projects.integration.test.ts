@@ -3,8 +3,8 @@ import request from 'supertest';
 import type { Express } from 'express';
 
 /**
- * Projects + tasks + comments + attachments integration suite (FEAT-003)
- * against a REAL Postgres. Skipped cleanly when no test DB is configured so
+ * Projects + tasks + comments + attachments integration suite against a REAL
+ * Postgres. Skipped cleanly when no test DB is configured so
  * `npm test` stays green on DB-less stages while running fully wherever a
  * Postgres is reachable.
  */

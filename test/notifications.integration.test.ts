@@ -5,10 +5,10 @@ import { io as ioClient, type Socket } from 'socket.io-client';
 import type { Express } from 'express';
 
 /**
- * Notifications (persistence + rule + socket) and AI integration suite
- * (FEAT-004) against a REAL Postgres with the mock LLM. Skipped cleanly when no
- * test DB is configured so `npm test` stays green on DB-less stages while
- * running fully wherever a Postgres is reachable.
+ * Notifications (persistence + rule + socket) and AI integration suite against
+ * a REAL Postgres with the mock LLM. Skipped cleanly when no test DB is
+ * configured so `npm test` stays green on DB-less stages while running fully
+ * wherever a Postgres is reachable.
  */
 const dbUrl = process.env.TEST_DATABASE_URL ?? process.env.DATABASE_URL;
 const describeDb = dbUrl ? describe : describe.skip;
