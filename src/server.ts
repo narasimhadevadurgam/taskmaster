@@ -29,7 +29,7 @@ export function createServer(): AppServer {
   const http = createHttpServer(app);
 
   // Attach socket.io (JWT handshake auth + per-user rooms) and wire the real
-  // notification emitter in place of FEAT-003's no-op.
+  // notification emitter in place of the default no-op.
   const io = attachRealtime(http);
   setNotificationEmitter(createSocketNotificationEmitter());
 
@@ -43,8 +43,23 @@ export function createServer(): AppServer {
       }),
     stop: () =>
       new Promise<void>((resolve, reject) => {
+        // socket.io's close() also closes the HTTP server it is attached to, so
+        // after detachRealtime() the HTTP server may already be closed. Only
+        // call http.close() if it is still listening, and treat an
+        // already-closed server (ERR_SERVER_NOT_RUNNING) as success since the
+        // goal — a stopped server — is already met.
         void detachRealtime().finally(() => {
-          http.close((err) => (err ? reject(err) : resolve()));
+          if (!http.listening) {
+            resolve();
+            return;
+          }
+          http.close((err) => {
+            if (err && (err as NodeJS.ErrnoException).code !== 'ERR_SERVER_NOT_RUNNING') {
+              reject(err);
+              return;
+            }
+            resolve();
+          });
         });
       }),
   };

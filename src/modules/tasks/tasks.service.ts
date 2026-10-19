@@ -33,13 +33,13 @@ const TASK_COLUMNS =
   't.creator_id, t.assignee_id, t.project_id, t.created_at, t.updated_at';
 
 /**
- * The injected notification emitter. FEAT-004 overrides it via
- * setNotificationEmitter(); the default is a persist-only no-op so FEAT-003
- * builds and tests green without the socket layer.
+ * The injected notification emitter. The socket layer overrides it at startup
+ * via setNotificationEmitter(); the default is a persist-only no-op so the task
+ * module works without the socket layer attached.
  */
 let notificationEmitter: NotificationEmitter = createNoopNotificationEmitter();
 
-/** Replace the notification emitter (used by FEAT-004 to wire socket.io). */
+/** Replace the notification emitter (the socket layer wires socket.io here). */
 export function setNotificationEmitter(emitter: NotificationEmitter): void {
   notificationEmitter = emitter;
 }
@@ -109,7 +109,7 @@ export async function createTask(callerId: number, input: CreateTaskInput): Prom
     try {
       const result = await client.query<Task>(
         `INSERT INTO tasks (title, description, status, priority, due_date, creator_id, assignee_id, project_id)
-         VALUES ($1, $2, COALESCE($3, 'open'), $4, $5, $6, $7, $8)
+         VALUES ($1, $2, COALESCE($3::task_status, 'open'), $4::task_priority, $5, $6, $7, $8)
          RETURNING ${TASK_COLUMNS.replace(/t\./g, '')}`,
         [
           input.title,

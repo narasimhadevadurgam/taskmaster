@@ -1,6 +1,10 @@
-# syntax=docker/dockerfile:1
-
 # ---- builder: install all deps and compile TypeScript to dist/ ----
+# No `# syntax=` directive on purpose: this Dockerfile uses only built-in
+# frontend features (multi-stage builds, COPY --from), so it compiles with
+# Docker's bundled Dockerfile frontend. Avoiding the external
+# docker/dockerfile frontend keeps `docker compose up` working on stock
+# Docker Desktop without the newer Buildx sandbox asking for an
+# `--allow=fs.read=Dockerfile` privilege grant.
 FROM node:20-slim AS builder
 WORKDIR /app
 

@@ -1,12 +1,39 @@
-import { readFileSync, readdirSync } from 'node:fs';
-import { dirname, join, resolve } from 'node:path';
+import { existsSync, readFileSync, readdirSync } from 'node:fs';
+import { dirname, join, parse, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { pool } from './pool.js';
 import { logger } from '../utils/logger.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-// src/db/migrate.ts -> repo root is two levels up; migrations/ lives there.
-const MIGRATIONS_DIR = resolve(__dirname, '..', '..', 'migrations');
+
+/**
+ * Locate the migrations/ directory by walking up from this module's location
+ * until a directory containing migrations/ is found. This resolves correctly in
+ * every layout the runner ships in:
+ *   - source via tsx:   src/db/migrate.ts   -> <repo>/migrations
+ *   - compiled via node: dist/src/db/migrate.js -> <repo>/migrations
+ *   - Docker image:      /app/dist/src/db/migrate.js, migrations copied to
+ *                        /app/migrations -> /app/migrations
+ * A fixed relative path would point at dist/migrations in the compiled layout,
+ * which does not exist (tsc does not copy .sql files).
+ */
+function findMigrationsDir(): string {
+  let current = __dirname;
+  const { root } = parse(current);
+  while (true) {
+    const candidate = resolve(current, 'migrations');
+    if (existsSync(candidate)) {
+      return candidate;
+    }
+    if (current === root) break;
+    current = dirname(current);
+  }
+  // Fall back to the conventional location relative to the project root so the
+  // error message points at a sensible path if nothing was found.
+  return resolve(__dirname, '..', '..', 'migrations');
+}
+
+const MIGRATIONS_DIR = findMigrationsDir();
 
 async function ensureMigrationsTable(): Promise<void> {
   await pool.query(`
